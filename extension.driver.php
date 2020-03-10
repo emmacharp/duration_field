@@ -11,26 +11,30 @@
 		/*------------------------------------------------------------------------------------------------*/
 
 		public function install() {
-			return Symphony::Database()->query(sprintf(
-				"CREATE TABLE `%s` (
-					`id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-					`field_id` INT(11) UNSIGNED NOT NULL,
-					`settings` text DEFAULT NULL,
-					PRIMARY KEY (`id`),
-					KEY `field_id` (`field_id`)
-				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;",
-				$this->field_table
-			));
+			return Symphony::Database()
+				->create($this->field_table)
+				->ifNotExists()
+				->fields([
+					'id' => [
+						'type' => 'int(11)',
+						'auto' => true,
+					],
+					'field_id' => 'int(11)',
+					'settings' => 'text'
+				])
+				->keys([
+					'id' => 'primary',
+					'field_id' => 'unique',
+				])
+				->execute()
+				->success();
 		}
 
 		public function uninstall() {
-			try {
-				Symphony::Database()->query(sprintf(
-					"DROP TABLE `%s`",
-					$this->field_table
-				));
-			} catch (DatabaseException $dbe) {
-				// table doesn't exist
-			}
+			return Symphony::Database()
+				->drop($this->field_table)
+				->ifExists()
+				->execute()
+				->success();
 		}
 	}

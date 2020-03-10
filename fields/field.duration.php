@@ -26,16 +26,24 @@
 		}
 
 		public function createTable() {
-			return Symphony::Database()->query("
-				CREATE TABLE IF NOT EXISTS `tbl_entries_data_" . $this->get('id') . "` (
-				  `id` int(11) unsigned NOT null auto_increment,
-				  `entry_id` int(11) unsigned NOT null,
-				  `value` double unsigned,
-				  PRIMARY KEY  (`id`),
-				  UNIQUE KEY `entry_id` (`entry_id`),
-				  KEY `value` (`value`)
-				) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-			");
+			return Symphony::Database()
+				->create('tbl_entries_data_' . General::intval($this->get('id')))
+				->ifNotExists()
+				->fields([
+					'id' => [
+						'type' => 'int(11)',
+						'auto' => true,
+					],
+					'entry_id' => 'int(11)',
+					'value' => 'double'
+				])
+				->keys([
+					'id' => 'primary',
+					'entry_id' => 'unique',
+					'value' => 'key',
+				])
+				->execute()
+				->success();
 		}
 
 		public function allowDatasourceParamOutput() {
